@@ -111,7 +111,10 @@
     
  * Check all the nodes public hostnames optionally using awscli
  
-   sudo apt install python-pip -y
-   sudo pip install awscli
-   aws ec2 describe-instances --filters "Name=tag:Cluster,Values=Ndbench" --query 'Reservations[*].Instances[*].PublicDnsName'
-   aws ec2 describe-instances --filters "Name=tag:Cluster,Values=Scylla" --query 'Reservations[*].Instances[*].PublicDnsName'
+    sudo apt install python-pip -y
+    
+    sudo pip install awscli
+    
+    aws ec2 describe-instances --filters "Name=tag:Cluster,Values=Ndbench" --query 'Reservations[*].Instances[*].PublicDnsName'
+    
+    aws ec2 describe-instances --filters "Name=tag:Cluster,Values=Scylla" --query 'Reservations[*].Instances[*].PublicDnsName'
