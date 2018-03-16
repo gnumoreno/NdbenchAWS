@@ -72,7 +72,7 @@
     cd ~/NdbenchAWS/ndbench
     ansible-playbook -i ec2.py -u ubuntu ndbench.yml
     ansible-playbook -i ec2.py -u ubuntu ndbench_start.yml
-     * It will display a list of nodes at the end. Pick one and open in the browser
+ * It will display a list of nodes at the end. Pick one and open in the browser
     
     
 ### Useful commands
