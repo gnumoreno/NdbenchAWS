@@ -38,6 +38,7 @@
     cd ~/NdbenchAWS/ndbench
     curl -O https://raw.githubusercontent.com/ansible/ansible/devel/contrib/inventory/ec2.py
     curl -O https://raw.githubusercontent.com/ansible/ansible/stable-1.9/plugins/inventory/ec2.ini
+    chmod +x ec2.py
     ./ec2.py --list 
 
 ### Provision your Scylla cluster
