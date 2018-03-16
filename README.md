@@ -9,7 +9,7 @@
  * [APT](http://docs.ansible.com/ansible/latest/intro_installation.html#latest-releases-via-apt-ubuntu)
 
 ### Create a security key on AWS
-    [Where's my secrect access key?](https://aws.amazon.com/blogs/security/wheres-my-secret-access-key/)
+ * [Where's my secrect access key?](https://aws.amazon.com/blogs/security/wheres-my-secret-access-key/)
 
 ### Download the pem file to your ~/.ssh/
 
