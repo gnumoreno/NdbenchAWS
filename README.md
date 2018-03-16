@@ -95,10 +95,6 @@
     
  * Check stats for your table
  
-   ansible -i ec2.py "tag_Cluster_Scylla" -u centos -m command -a "cqlsh -e 'desc schema;'"
-    
- * Check schema
- 
    ansible -i ec2.py "tag_Cluster_Scylla" -u centos -m command -a "nodetool tablestats ndbench.scylla"
     
  * Check Schema
