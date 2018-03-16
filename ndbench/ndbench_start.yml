@@ -1,0 +1,36 @@
+- name: Start NDBench
+  hosts: "{{ variable_host | default('tag_Cluster_Ndbench') }}"
+  become: yes
+  tasks:
+
+  - setup:
+
+  - ec2_metadata_facts:
+
+  - name: Configuring environment variables
+    lineinfile:
+      path: /etc/default/tomcat8
+      line: DISCOVERY_ENV="CONFIG_FILE"
+      state: present
+
+  - name: Configuring Heap Size to 80% of total memory
+    lineinfile:
+      path: /etc/default/tomcat8
+      line: CATALINA_OPTS="-Xms512m -Xmx{{ (ansible_memtotal_mb*0.8)|int|abs }}m"    
+      state: present
+      
+  - name: Cleaning up Tomcat root dir
+    file: 
+      path: /var/lib/tomcat8/webapps/ROOT 
+      state: absent
+        
+  - name: Deploy NDBench to Tomcat
+    shell: cp /home/ubuntu/ndbench/ndbench-web/build/libs/ndbench-web-0.3.11-SNAPSHOT.war /var/lib/tomcat8/webapps/ROOT.war
+    
+  - name: Restarting Tomcat8
+    systemd:
+      name: tomcat8
+      state: restarted
+
+  - debug:
+      msg: "{{ ansible_ec2_public_hostname }}:8080"

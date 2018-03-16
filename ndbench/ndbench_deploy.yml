@@ -1,0 +1,95 @@
+- name: Installing Pre-Requisites, cloning and building NDBench
+  hosts: "{{ variable_host | default('tag_Cluster_Ndbench') }}"
+  become: true
+  gather_facts: false
+  tasks:
+  - name: install python 2
+    raw: test -e /usr/bin/python || (apt -y update && apt install -y python-minimal)
+
+  - setup:
+      
+  - ec2_metadata_facts:
+
+  - name: Running apt-get update
+    apt:
+      update_cache: yes
+
+  - name: Upgrading all packages to the latest version
+    apt:
+      upgrade: dist
+      autoclean: yes
+      autoremove: yes
+    when: ansible_distribution == 'Debian' or ansible_distribution == 'Ubuntu'
+
+  - name: Installing NDBench Pre-reqs
+    become: true
+    apt:
+      name: "{{ item }}"
+      state: installed
+      update_cache: yes
+    when: ansible_distribution == 'Debian' or ansible_distribution == 'Ubuntu'
+    with_items:
+      - git
+      - openjdk-8-jdk
+      - language-pack-pt
+      - tomcat8
+      
+  - name: Clonning NDBench from github
+    git:
+      repo: 'https://github.com/Netflix/ndbench.git'
+      dest: /home/ubuntu/ndbench
+      clone: yes
+      force: yes
+    become: false
+    
+  - name: Copying properties file
+    copy:
+      src: ./application.properties
+      dest: /home/ubuntu/ndbench/ndbench-core/src/main/resources/application.properties
+      owner: ubuntu
+      group: ubuntu
+      mode: 0644
+      
+  - name: Temp - Copy local classes until it gets merged to NDBench master branch 1/3 - enable cluster config file
+    copy:
+      src: ../ndbench/ndbench-core/src/main/java/com/netflix/ndbench/core/defaultimpl/NdBenchGuiceModule.java
+      dest: /home/ubuntu/ndbench/ndbench-core/src/main/java/com/netflix/ndbench/core/defaultimpl/NdBenchGuiceModule.java
+      owner: ubuntu
+      group: ubuntu
+      mode: 0644
+      
+  - name: Temp - Copy local classes until it gets merged to NDBench master branch 2/3 - enable cluster config file
+    copy:
+      src: ../ndbench/ndbench-api/src/main/java/com/netflix/ndbench/api/plugin/common/NdBenchConstants.java
+      dest: /home/ubuntu/ndbench/ndbench-api/src/main/java/com/netflix/ndbench/api/plugin/common/NdBenchConstants.java
+      owner: ubuntu
+      group: ubuntu
+      mode: 0644
+      
+  - name: Temp - Copy local classes until it gets merged to NDBench master branch 3/3 - change table schema
+    copy:
+      src: ../ndbench/ndbench-cass-plugins/src/main/java/com/netflix/ndbench/plugin/cass/CJavaDriverBasePlugin.java
+      dest: /home/ubuntu/ndbench/ndbench-cass-plugins/src/main/java/com/netflix/ndbench/plugin/cass/CJavaDriverBasePlugin.java
+      owner: ubuntu
+      group: ubuntu
+      mode: 0644
+      
+  - name: Getting list of public hostnames
+    set_fact: publicdns_item="{{ '\"' + hostvars[item]['ansible_ec2_public_hostname'] + ':8080' + '\"' }}"
+    with_items: "{{ groups['tag_Cluster_Ndbench'] }}"
+    register: publicdns_result
+    
+  - name: Creating list of public hostnames
+    set_fact: dnslist="{{ publicdns_result.results | map(attribute='ansible_facts.publicdns_item') | list }}"    
+  
+  - name: Creating clusters.json
+    shell: echo { " \"{{ ansible_ec2_public_hostname }}"'":' "{{ dnslist | to_json }}" } > /home/ubuntu/ndbench/ndbench-core/src/main/resources/clusters.json
+    
+  - name: Building NDBench
+    shell: ./gradlew build
+    environment:
+      DISCOVERY_ENV: CONFIG_FILE
+    args:
+      chdir: /home/ubuntu/ndbench
+    become: false
+
