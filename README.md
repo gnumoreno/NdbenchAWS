@@ -46,7 +46,7 @@
 [How to provision a Scylla cluster in AWS](https://www.scylladb.com/download/amazon/)
  * To make your life easier, add the following tag key/value on step 5:
  
-      Cluster: Scylla 
+        Cluster: Scylla  
     
 ### Provision your instances on AWS 
 
